@@ -12,11 +12,11 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, myapp1]
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.20.0]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -26,6 +26,18 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+
+    - name: install server dependencies
+      working-directory: .
+      run: |
+        npm install
+        npm run build --if-present
+    - name: install client dependencies
+      working-directory: ./front
+      run: |
+        npm install
+        npm run build --if-present
+    - name: start application
+      run: |
+        pm2 start ecosystem.config.js
+        pm2 save
