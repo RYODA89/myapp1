@@ -48,3 +48,133 @@ certbot --nginx -d myapp1.demo-server-spider.com
 sudo certbot certificates
 
 --------------------------------------------------------------------------------------------------------
+
+
+*** GIT (CI/CD) ***
+-1.Création du repository
+
+NB: Créer un repository sans readme, licence ni .gitignore
+
+-2.Lier le projet local au repository
+
+# 1. configurer la branch par defaut sur main et non plus master
+git config --global init.defaultBranch main
+
+# 2. initialiser le projet git
+git init
+
+# 3. lier le projet et le repo 
+git remote add origin https://github.com/RYODA89/nextapp1.git
+
+
+# 4. créer le fichier .gitignore et ajouter node_modules, .env, dist
+
+# 5. ajouter les fichiers modifiés
+git add .
+
+# 6. faire un commit
+git commit -m "first commit"
+
+
+# 7. pusher pour synchroniser sur la branch main
+git push -u origin main
+
+#pour forcer
+git push -uf main
+
+# NB: Au cas ou on n'arrive pas à passer sur la branche main
+git checkout -b main
+
+-3.Création du workflow sur GitHub
+
+# 1. créer le workflow: dans GitHub / actions / (choisir node.js dans la section continious integration)
+# et clicker sur commit
+
+# 2. récupérer les modifs sur GitHub dans le projet local
+git pull
+
+# 3. Modifier le contenu du fichier .github/workflows/node.js.yml
+
+
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: [self-hosted, nextapp1]
+
+    strategy:
+      matrix:
+        node-version: [20.6.1]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: environnement variable
+      run: |
+        touch .env
+        echo "${{ secrets.PROD_ENV_FILE}}" > .env
+   
+    - name: Install dependencies
+      run: |
+        npm i 
+        npm run build --if-present
+
+    - name: start application and save
+      run: |
+        pm2 start ecosystem.config.js
+        pm2 save
+
+
+
+-4.Création de l’actions-runner
+
+# 1. Aller dans le repository sur github puis settings/actions/runners et cliquer sur le bouton  new runner
+
+# 2. Choisir Linux pour afficher les instructions de configurations
+
+# 3. Se connecter au vps (serveur d'hebergement)
+
+# 4. Créer le répertoire qui va accueillir le projet
+sudo mkdir /mnt/hosting/sites/github/demo 
+
+
+# 5. Changer le propriétaire du repornextapp1toire
+sudo chown -R ubuntu:ubuntu /mnt/hosting/sites/github/demo
+
+# 6. Se positionner dans le repertoire
+cd /mnt/hosting/sites/github/demo 
+
+# 7. Executer les commandes dans les instructions sur github
+# A l'étape de la commande configure (./config.sh --url https://github.com/spd-dev-team/test-projet --token AXWZLNBFXNIVVWZ55V2LAT3GHEKCG)
+	- Groupe des runners: laisser par defaut (Faire entrer)
+	- Nom du projet: mettre le nom du projet (exemple: demo)
+	- label:  mettre le nom du projet (exemple: demo)
+	- le repertoire de travail: laisser par defaut (Faire entrer)
+
+# 8. Configurer le demarrage automatique
+sudo ./svc.sh install ubuntu 
+# ubuntu = nom utilisateur linux 
+
+# 9. checker le status
+sudo ./svc.sh status
+
+# 10. démarrer le service
+sudo ./svc.sh start
+
+
+
+NB: Si tout s'est bien passé, cliquer sur runners dans la section github settings/actions/ pour verifier la mention "idle" et une icone verte

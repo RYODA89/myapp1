@@ -16,7 +16,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React Test https://ryoda.demo-server-spider.com/myapp1
+          Learn React URL: https://myapp1.demo-server-spider.com
         </a>
       </header>
     </div>
