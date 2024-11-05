@@ -18,8 +18,10 @@ function App() {
         >
           Learn React 
           <br/>
+          <hr/>
           https://myapp1.demo-server-spider.com
           <br/>
+          <hr/>
           05-11-2024 10:50
           
         </a>
