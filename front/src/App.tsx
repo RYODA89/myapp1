@@ -16,7 +16,12 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React URL: https://myapp1.demo-server-spider.com
+          Learn React 
+          
+          https://myapp1.demo-server-spider.com
+          
+          05-11-2024 10:50
+          
         </a>
       </header>
     </div>

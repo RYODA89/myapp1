@@ -64,7 +64,7 @@ git config --global init.defaultBranch main
 git init
 
 # 3. lier le projet et le repo 
-git remote add origin https://github.com/RYODA89/nextapp1.git
+git remote add origin https://github.com/RYODA89/myapp1.git
 
 
 # 4. créer le fichier .gitignore et ajouter node_modules, .env, dist
@@ -104,15 +104,17 @@ name: Node.js CI
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
 
-    runs-on: [self-hosted, nextapp1]
+    runs-on: [self-hosted, myapp1]
 
     strategy:
       matrix:
-        node-version: [20.6.1]
+        node-version: [18.20.0]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -122,21 +124,22 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
-    - name: environnement variable
-      run: |
-        touch .env
-        echo "${{ secrets.PROD_ENV_FILE}}" > .env
-   
-    - name: Install dependencies
-      run: |
-        npm i 
-        npm run build --if-present
 
-    - name: start application and save
+    - name: install server dependencies
+      working-directory: .
+      run: |
+        npm install
+        npm run build --if-present
+    - name: install client dependencies
+      working-directory: ./front
+      run: |
+        npm install
+        npm run build --if-present
+    - name: start application
       run: |
         pm2 start ecosystem.config.js
         pm2 save
+
 
 
 
@@ -149,20 +152,20 @@ jobs:
 # 3. Se connecter au vps (serveur d'hebergement)
 
 # 4. Créer le répertoire qui va accueillir le projet
-sudo mkdir /mnt/hosting/sites/github/demo 
+sudo mkdir /mnt/hosting/sites/github/myapp1 
 
 
-# 5. Changer le propriétaire du repornextapp1toire
-sudo chown -R ubuntu:ubuntu /mnt/hosting/sites/github/demo
+# 5. Changer le propriétaire du repormyapp1toire
+sudo chown -R ubuntu:ubuntu /mnt/hosting/sites/github/myapp1
 
 # 6. Se positionner dans le repertoire
-cd /mnt/hosting/sites/github/demo 
+cd /mnt/hosting/sites/github/myapp1
 
 # 7. Executer les commandes dans les instructions sur github
 # A l'étape de la commande configure (./config.sh --url https://github.com/spd-dev-team/test-projet --token AXWZLNBFXNIVVWZ55V2LAT3GHEKCG)
 	- Groupe des runners: laisser par defaut (Faire entrer)
-	- Nom du projet: mettre le nom du projet (exemple: demo)
-	- label:  mettre le nom du projet (exemple: demo)
+	- Nom du projet: mettre le nom du projet (exemple: myapp1)
+	- label:  mettre le nom du projet (exemple: myapp1)
 	- le repertoire de travail: laisser par defaut (Faire entrer)
 
 # 8. Configurer le demarrage automatique
